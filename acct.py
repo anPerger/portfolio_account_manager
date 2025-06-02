@@ -10,11 +10,11 @@ from pymongo import MongoClient
 
 
 client = MongoClient()
-# print(client.list_database_names())
 portfolio_accts_db = client["portfolio_accts"]
 users_col = portfolio_accts_db["users"]
 
 app = Flask(__name__)
+
 
 
 @app.route("/verify-account", methods=["GET"])
@@ -28,7 +28,6 @@ def verify_account():
     if user_data:
         if password == user_data["password"]:
             results = {"success": 1}
-            # print("verified")
         else:
             error_msg = "That username and password don't match our records"
             results = {"success": 0,
@@ -47,12 +46,11 @@ def verify_account():
 def fetch_account():
 
     username = request.args.get("username")
-    # print(username)
+    
+
     results = users_col.find_one({"username": username})
 
     del results["_id"]
-
-    # print(results)
 
     return jsonify({"results": results})
 
@@ -63,10 +61,8 @@ def create_account():
     username = request.args.get("username")
     password = request.args.get("password")
 
-
     user_data = users_col.find_one({"username": username})
 
-    
     if user_data:
         error_msg = "That username is already in use"
         results = {"success": 0,
@@ -88,10 +84,10 @@ def update_account():
     password = request.args.get("password")
     horizon = request.args.get("horizon")
     risk = request.args.get("risk")
+    
 
     prior_user = users_col.find_one({"username": username})
-    print(f"old user: {prior_user}")
-
+    
     if len(password) < 1:
         password = prior_user["password"]
     if len(horizon) < 1:
@@ -108,9 +104,7 @@ def update_account():
             }
 
         users_col.update_one(query_filter, update_operation)
-        # new_user = users_col.find_one({"username": username})
-        # print(f"new user: {new_user}")
-
+       
         results = {"success": 1}
 
     except:
