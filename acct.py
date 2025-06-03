@@ -15,8 +15,6 @@ users_col = portfolio_accts_db["users"]
 
 app = Flask(__name__)
 
-
-
 @app.route("/verify-account", methods=["GET"])
 def verify_account():
 
