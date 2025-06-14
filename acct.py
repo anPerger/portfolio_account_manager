@@ -7,6 +7,7 @@ from bson.json_util import dumps, loads
 import json
 import pymongo
 from pymongo import MongoClient
+import secrets
 
 
 client = MongoClient()
@@ -44,9 +45,10 @@ def verify_account():
 def fetch_account():
 
     username = request.args.get("username")
+    api_key = request.args.get("key")
     
 
-    results = users_col.find_one({"username": username})
+    results = users_col.find_one({"username": username, "APIkey": api_key})
 
     del results["_id"]
 
@@ -66,8 +68,16 @@ def create_account():
         results = {"success": 0,
                 "error_msg": error_msg}
     else:
+        key_exists = True
+        while key_exists == True:
+            key_urlsafe = secrets.token_urlsafe(32)
+           
+            key_check = users_col.find_one({"APIkey": key_urlsafe})
+            if not key_check:
+                key_exists = False
+
         users_col.insert_one({
-        "username": username, "password": password, 
+        "username": username, "password": password, "APIkey": key_urlsafe,
         "risk": "none", "horizon": 0
         })
         results = {"success": 1}
@@ -83,8 +93,9 @@ def update_account():
     horizon = request.args.get("horizon")
     risk = request.args.get("risk")
     
+    api_key = request.args.get("key")
 
-    prior_user = users_col.find_one({"username": username})
+    prior_user = users_col.find_one({"username": username, "APIkey": api_key})
     
     if len(password) < 1:
         password = prior_user["password"]
@@ -96,7 +107,7 @@ def update_account():
     horizon = int(horizon)
 
     try:
-        query_filter = {"username": username}
+        query_filter = {"username": username, "APIkey": api_key}
         update_operation = {
             "$set": {"password": password, "horizon": horizon, "risk": risk}
             }
