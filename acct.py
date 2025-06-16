@@ -8,9 +8,17 @@ import json
 import pymongo
 from pymongo import MongoClient
 import secrets
+import mongo_creds
 
-
-client = MongoClient()
+username = f'{mongo_creds.username}'
+password = f'{mongo_creds.password}'
+cluster = f'{mongo_creds.clustername}'
+auth = f'{mongo_creds.auth}'
+# authSource = '<authSource>'
+# authMechanism = '<authMechanism>'
+uri = 'mongodb+srv://' + username + ':' + password + '@' + cluster + "." + auth + '.mongodb.net'
+print(uri)
+client = pymongo.MongoClient(uri)
 portfolio_accts_db = client["portfolio_accts"]
 users_col = portfolio_accts_db["users"]
 
